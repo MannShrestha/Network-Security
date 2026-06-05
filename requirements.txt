@@ -4,5 +4,12 @@ pymongo
 pymongo[srv]==3.12
 certifi
 python-dotenv
+scikit-learn
+mlflow
+pyaml
+# dagshub
+# fastapi
+# uvicorn
+# python-multipart
 
 -e .
