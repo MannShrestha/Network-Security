@@ -7,9 +7,9 @@ python-dotenv
 scikit-learn
 mlflow
 pyaml
-# dagshub
+dagshub
 # fastapi
 # uvicorn
 # python-multipart
 
--e .
+# -e .
