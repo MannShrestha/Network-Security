@@ -1,8 +1,9 @@
 <div align="justify">
 
-![workflow](Images/workflow.png)
 
 # Network-Security / Website-phishing-detection
+
+--- 
 
 ## Project Overview
 
@@ -22,11 +23,17 @@ To perform phishing website classification, the Phishing Websites Data Set of th
 
 ---
 
+# Project Workflow
+
+![workflow](Images/workflow.png)
+
+--- 
+
 <div style="display: flex; overflow-x: auto; gap: 16px; padding-bottom: 10px;">
   <img src="Images/output.png" alt="output" width="500" />
 </div>
 
-# Detailed End-to-End Machine Learning Pipeline
+# End-to-End Machine Learning Pipeline
 
 ## 1. Data Collection and Centralized Storage
 
