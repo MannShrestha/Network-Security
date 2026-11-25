@@ -39,29 +39,21 @@ To perform phishing website classification, the Phishing Websites Data Set of th
 
 The project begins with a phishing website dataset containing over thirty website and URL-based security features. These attributes describe various characteristics of a website, such as URL behavior, SSL status, domain information, web traffic indicators, Google indexing status, and other phishing-related signals.
 
-Instead of directly training from a local file, the dataset is uploaded into MongoDB Atlas. This approach simulates a production environment where data is stored in a centralized database rather than local storage. Using MongoDB provides scalability, remote accessibility, and a clear separation between data engineering and machine learning workflows.
-
-At this stage, the dataset serves as the primary data source for all subsequent machine learning operations.
+Instead of directly training from a local file, the dataset is uploaded into MongoDB Atlas. This approach simulates a production environment where data is stored in a centralized database rather than local storage. Using MongoDB provides scalability, remote accessibility, and a clear separation between data engineering and machine learning workflows. At this stage, the dataset serves as the primary data source for all subsequent machine learning operations.
 
 ---
 
 ## 2. Data Ingestion
 
-The Data Ingestion component acts as the entry point of the machine learning pipeline.
+The Data Ingestion component acts as the entry point of the machine learning pipeline. The component establishes a connection with MongoDB Atlas and retrieves all records from the database collection. The retrieved records are converted into a structured pandas DataFrame and stored within a feature store to maintain reproducibility. Keeping a feature store allows the project to preserve the exact version of the data used for a particular experiment or model training run.
 
-The component establishes a connection with MongoDB Atlas and retrieves all records from the database collection. The retrieved records are converted into a structured pandas DataFrame and stored within a feature store to maintain reproducibility. Keeping a feature store allows the project to preserve the exact version of the data used for a particular experiment or model training run.
-
-After loading the dataset, the component performs train-test splitting. The training dataset is used to learn patterns, while the testing dataset is reserved exclusively for model evaluation. This separation helps estimate how the model will perform on unseen data.
-
-The generated datasets are stored as artifacts so that every pipeline run can be traced, reproduced, and audited later.
+After loading the dataset, the component performs train-test splitting. The training dataset is used to learn patterns, while the testing dataset is reserved exclusively for model evaluation. This separation helps estimate how the model will perform on unseen data. The generated datasets are stored as artifacts so that every pipeline run can be traced, reproduced, and audited later.
 
 ---
 
 ## 3. Data Validation
 
-The purpose of the Data Validation stage is to ensure that the incoming data satisfies all predefined quality requirements before any preprocessing or model training takes place.
-
-The validation process compares the incoming dataset against a predefined schema. This schema defines expected feature names, data types, and dataset structure.
+The purpose of the Data Validation stage is to ensure that the incoming data satisfies all predefined quality requirements before any preprocessing or model training takes place. The validation process compares the incoming dataset against a predefined schema. This schema defines expected feature names, data types, and dataset structure.
 
 Several quality checks are performed:
 
@@ -71,33 +63,21 @@ Several quality checks are performed:
 - Dataset integrity verification
 - Training and testing data drift analysis
 
-Data drift detection is particularly important because machine learning models assume that future data follows patterns similar to training data. If the new data significantly differs from historical data, model performance may decline. By generating data drift reports, the system helps identify changes in data distribution before deployment.
-
-This stage ensures that only high-quality data proceeds to model training.
+Data drift detection is particularly important because machine learning models assume that future data follows patterns similar to training data. If the new data significantly differs from historical data, model performance may decline. By generating data drift reports, the system helps identify changes in data distribution before deployment. This stage ensures that only high-quality data proceeds to model training.
 
 ---
 
 ## 4. Data Transformation
 
-Raw datasets are rarely suitable for direct machine learning training. Therefore, the Data Transformation stage is responsible for preparing the data for model development.
+Raw datasets are rarely suitable for direct machine learning training. Therefore, the Data Transformation stage is responsible for preparing the data for model development. One of the most important operations performed in this stage is missing value handling using a K-Nearest Neighbors (KNN) imputation strategy. Missing values can negatively impact machine learning algorithms, so they are replaced using patterns learned from neighboring data points.
 
-One of the most important operations performed in this stage is missing value handling using a K-Nearest Neighbors (KNN) imputation strategy. Missing values can negatively impact machine learning algorithms, so they are replaced using patterns learned from neighboring data points.
-
-After imputation, the datasets are transformed into machine-learning-friendly numerical arrays. The entire preprocessing workflow is encapsulated inside a reusable preprocessing object.
-
-Saving the preprocessing pipeline is critical because prediction data must undergo exactly the same transformations used during training. Without this consistency, prediction results would become unreliable.
-
-The transformed datasets and preprocessing pipeline are stored as artifacts and passed to the next stage of the workflow.
+After imputation, the datasets are transformed into machine-learning-friendly numerical arrays. The entire preprocessing workflow is encapsulated inside a reusable preprocessing object. Saving the preprocessing pipeline is critical because prediction data must undergo exactly the same transformations used during training. Without this consistency, prediction results would become unreliable. The transformed datasets and preprocessing pipeline are stored as artifacts and passed to the next stage of the workflow.
 
 ---
 
 ## 5. Model Training
 
-The Model Training stage is responsible for identifying the most suitable machine learning algorithm for detecting phishing websites.
-
-Instead of relying on a single algorithm, the pipeline evaluates multiple machine learning models and automatically selects the best-performing candidate.
-
-The following algorithms are trained and compared:
+The Model Training stage is responsible for identifying the most suitable machine learning algorithm for detecting phishing websites. Instead of relying on a single algorithm, the pipeline evaluates multiple machine learning models and automatically selects the best-performing candidate. The following algorithms are trained and compared:
 
 ### Random Forest Classifier
 
@@ -117,7 +97,7 @@ Logistic Regression serves as a statistical baseline model. It is efficient, int
 
 ### AdaBoost Classifier
 
-AdaBoost focuses on difficult-to-classify observations by assigning higher importance to previously misclassified samples. This often improves classification performance in challenging datasets.
+AdaBoost focuses on difficult-to-classify observations by assigning higher importance to previously misclassified samples. This often improves classification performance in challenging datasets. 
 
 By evaluating multiple algorithms instead of relying on a single model, the pipeline increases the likelihood of selecting the most effective phishing detection solution.
 
@@ -125,9 +105,7 @@ By evaluating multiple algorithms instead of relying on a single model, the pipe
 
 ## 6. Hyperparameter Optimization
 
-Merely training a model with default settings rarely leads to optimal performance.
-
-To address this challenge, the project uses GridSearchCV to automatically search across multiple hyperparameter combinations for each algorithm.
+Merely training a model with default settings rarely leads to optimal performance. To address this challenge, the project uses GridSearchCV to automatically search across multiple hyperparameter combinations for each algorithm.
 
 Examples of optimized parameters include:
 
@@ -137,9 +115,7 @@ Examples of optimized parameters include:
 - Splitting criteria
 - Ensemble sizes
 
-Every candidate model is trained and validated across multiple parameter combinations, and the configuration producing the highest performance score is selected.
-
-This automated optimization process improves model accuracy and ensures the final model performs at its full potential.
+Every candidate model is trained and validated across multiple parameter combinations, and the configuration producing the highest performance score is selected. This automated optimization process improves model accuracy and ensures the final model performs at its full potential.
 
 ---
 
@@ -157,9 +133,7 @@ Measures the model's ability to identify all phishing websites present in the da
 
 ### F1-Score
 
-Provides a balanced measure of precision and recall, making it particularly important for cybersecurity classification tasks.
-
-Since phishing detection involves minimizing both false positives and false negatives, these metrics provide a comprehensive assessment of model quality.
+Provides a balanced measure of precision and recall, making it particularly important for cybersecurity classification tasks. Since phishing detection involves minimizing both false positives and false negatives, these metrics provide a comprehensive assessment of model quality. 
 
 The best-performing model is automatically selected and promoted to production.
 
@@ -167,10 +141,7 @@ The best-performing model is automatically selected and promoted to production.
 
 ## 8. Experiment Tracking with MLflow and DagsHub
 
-Machine learning experiments often involve multiple training runs, parameter combinations, and model versions.
-
-To ensure proper experiment management, the project integrates MLflow and DagsHub.
-
+Machine learning experiments often involve multiple training runs, parameter combinations, and model versions. To ensure proper experiment management, the project integrates MLflow and DagsHub.
 During every training run, the pipeline automatically records:
 
 - Model performance metrics
@@ -179,19 +150,13 @@ During every training run, the pipeline automatically records:
 - Artifacts
 - Model versions
 
-Experiment tracking provides complete traceability and allows developers to compare different model versions and reproduce historical results when necessary.
-
-This represents an important MLOps best practice for professional machine learning systems.
+Experiment tracking provides complete traceability and allows developers to compare different model versions and reproduce historical results when necessary. This represents an important MLOps best practice for professional machine learning systems.
 
 ---
 
 ## 9. Model Packaging
 
-After selecting the best-performing algorithm, the model is packaged together with the preprocessing pipeline.
-
-This combined package ensures that future prediction requests use exactly the same preprocessing logic that was applied during training.
-
-By coupling preprocessing and prediction logic together, the project eliminates inconsistencies between training and inference environments.
+After selecting the best-performing algorithm, the model is packaged together with the preprocessing pipeline. This combined package ensures that future prediction requests use exactly the same preprocessing logic that was applied during training. By coupling preprocessing and prediction logic together, the project eliminates inconsistencies between training and inference environments.
 
 The packaged model forms the final production artifact.
 
@@ -295,13 +260,7 @@ This infrastructure provides a scalable environment capable of serving predictio
 
 ## FastAPI Model Serving
 
-The deployed FastAPI application exposes REST APIs that provide both training and prediction capabilities.
-
-The training endpoint allows retraining the complete pipeline whenever new data becomes available.
-
-The prediction endpoint enables users to upload CSV files and receive batch predictions.
-
-FastAPI serves as the bridge between machine learning models and end users.
+The deployed FastAPI application exposes REST APIs that provide both training and prediction capabilities. The training endpoint allows retraining the complete pipeline whenever new data becomes available. The prediction endpoint enables users to upload CSV files and receive batch predictions. FastAPI serves as the bridge between machine learning models and end users.
 
 ---
 
